@@ -1,0 +1,3 @@
+USER - Login, Registration
+JWT Token setup authorization + authentication
+THREAD - Creation, Modify, Deletion

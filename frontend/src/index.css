@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Custom CSS */
+.blurred-background {
+    position: relative;
+    overflow: hidden; /* Ensure the blur doesn't overflow */
+}
+
+.blurred-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: inherit; /* Inherit the background image */
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px); /* Adjust the blur intensity here */
+    z-index: -1; /* Place it behind the content */
+}
