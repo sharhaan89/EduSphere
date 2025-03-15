@@ -6,10 +6,13 @@ export async function handleGetAllThreads(req, res) {
     try {
         const result = await pool.query(
             `SELECT threads.id, threads.title, threads.content, threads.subforum, 
-                    threads.created_at, users.username 
-             FROM threads 
-             JOIN users ON threads.user_id = users.id 
-             WHERE threads.subforum = $1 
+                    threads.created_at, users.username, 
+                    COUNT(replies.id) AS repliesCount
+             FROM threads
+             JOIN users ON threads.user_id = users.id
+             LEFT JOIN replies ON replies.thread_id = threads.id
+             WHERE threads.subforum = $1
+             GROUP BY threads.id, users.username
              ORDER BY threads.created_at DESC`,
             [subforum]
         );
@@ -20,7 +23,6 @@ export async function handleGetAllThreads(req, res) {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
-
 export async function handleGetThread(req, res) {
     const threadid = req.params.id;
 
@@ -63,7 +65,7 @@ export async function handleGetThread(req, res) {
 
         res.status(200).json({
             thread: threadResult.rows[0],
-            replies: repliesResult.rows
+            replies: repliesResult.rows,
         });
 
     } catch (error) {

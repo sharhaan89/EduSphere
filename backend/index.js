@@ -27,6 +27,10 @@ app.use("/forum/thread", threadRouter);
 app.use("/forum/reply", replyRouter);
 app.use("/forum/vote", voteRouter);
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running on PORT: ${PORT}`);
-});
+try {
+    app.listen(PORT, () => {
+    console.log(`✅ Server running on PORT: ${PORT}`);
+    });
+} catch (err) {
+    console.log("Error in starting the server.");
+}
