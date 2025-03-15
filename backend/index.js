@@ -15,7 +15,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 
 app.use(
     cors({
-        origin: "http://localhost:5173", // Adjust based on your frontend
+        origin: FRONTEND_URL, // Adjust based on your frontend
         credentials: true,  // Allows cookies to be sent & received
     })
 );
