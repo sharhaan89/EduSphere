@@ -70,11 +70,11 @@ export async function handleUserLogin(req, res) {
 
         // Set the token in an HTTP-only cookie
         res.cookie("token", token, {
-            httpOnly: true,  // Prevents JavaScript access (XSS protection)
-            secure: process.env.NODE_ENV === "production",  // Uses secure cookies in production (HTTPS)
-            sameSite: "strict",  // Prevents CSRF attacks
-            maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days expiration
-        });
+            httpOnly: true,  
+            secure: true,  
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000  
+        });        
 
         res.status(200).json({ message: "Login successful" });
 
