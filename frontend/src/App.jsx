@@ -10,14 +10,14 @@ export default function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/home" element={<h1>Home Page</h1>} />
+                <Route path="/home" element={<ForumPage />} />
                 <Route path="/forum" element={<ForumPage />} />
                 <Route path="/user/login" element={<LoginPage />} />
                 <Route path="/user/register" element={<RegisterPage />} />
                 <Route path="/forum/:subforum/all" element={<SubforumPage />} />
                 <Route path="/forum/thread/:id" element={<ThreadPage />} />
                 <Route path="/forum/thread/:subforum/create" element={<ThreadCreatePage />} />
-                <Route path="* " element={<h1>404 Not Found</h1>} />
+                <Route path="*" element={<ForumPage />} />
             </Routes>
         </Router>
     );

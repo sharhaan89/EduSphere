@@ -13,7 +13,12 @@ const pool = new Pool({
 });
 
 pool.connect()
-    .then(() => console.log("✅ Connected to Neon Vercel Postgres Database"))
+    .then(async (client) => {
+        console.log("✅ Connected to Neon Vercel Postgres Database");
+        await client.query("SET TIME ZONE 'Asia/Kolkata';");
+        console.log("⏰ Time zone set to IST (Asia/Kolkata)");
+        client.release();
+    })
     .catch((err) => console.error("ERROR: Database connection error:", err.message));
 
 export default pool;

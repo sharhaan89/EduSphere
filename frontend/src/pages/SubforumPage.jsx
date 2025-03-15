@@ -6,7 +6,8 @@ import { useParams, Link } from "react-router-dom"
 const API_URL = import.meta.env.VITE_API_URL
 
 export default function SubforumPage() {
-  const { subforum } = useParams()
+  let { subforum } = useParams()
+  subforum = subforum.toLowerCase();
   const [threads, setThreads] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -30,7 +31,7 @@ export default function SubforumPage() {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
-                {subforum}
+                {subforum.charAt(0).toUpperCase() + subforum.slice(1)}
               </span>{" "}
               Forum
             </h1>

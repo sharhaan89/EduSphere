@@ -1,5 +1,6 @@
 "use client"
 
+import DOMPurify from "dompurify";
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
 
@@ -10,6 +11,7 @@ export default function ThreadPage() {
   const [thread, setThread] = useState(null)
   const [replies, setReplies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [voteLoading, setVoteLoading] = useState(false)
   const [showReplyBox, setShowReplyBox] = useState(false)
   const [replyContent, setReplyContent] = useState("")
   const [posting, setPosting] = useState(false)
@@ -63,7 +65,21 @@ export default function ThreadPage() {
   }, [thread, replies])
 
   async function handleVote(contentId, contentType, voteType) {
+    if (voteLoading) return; // Prevent multiple clicks while request is pending
+    setVoteLoading(true); // Lock voting temporarily
+  
     try {
+      // Optimistically update the UI
+      if (contentType === "thread") {
+        setThreadVotes((prevVotes) => Number(prevVotes) + voteType);
+      } else if (contentType === "reply") {
+        setReplyVotes((prevVotes) => ({
+          ...prevVotes,
+          [contentId]: Number(prevVotes[contentId] || 0) + voteType,
+        }));
+      }
+  
+      // Send vote request to backend
       const response = await fetch(`${API_URL}/forum/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,17 +89,21 @@ export default function ThreadPage() {
           reply_id: contentType === "reply" ? contentId : null,
           vote_type: voteType,
         }),
-      })
-      if (response.ok) {
-        fetchVoteCounts()
+      });
+  
+      if (!response.ok) {
+        console.error("Vote failed");
+        fetchVoteCounts(); // Re-fetch correct values from backend if request fails
       } else {
-        console.error("Vote failed")
+        fetchVoteCounts(); // Fetch correct values after a successful vote
       }
     } catch (error) {
-      console.error("Vote error:", error)
+      console.error("Vote error:", error);
+      fetchVoteCounts(); // Fetch correct values in case of an error
+    } finally {
+      setVoteLoading(false); // Unlock voting after request completes
     }
   }
-
   async function handleSubmitReply(e) {
     e.preventDefault()
     if (!replyContent.trim()) return
@@ -114,6 +134,18 @@ export default function ThreadPage() {
     } finally {
       setPosting(false)
     }
+  }
+
+  async function handleDeleteReply(e) {
+    e.preventDefault();
+  }
+
+  async function handleEditReply(e) {
+    e.preventDefault();
+  }
+
+  async function handleDeleteThread(e) {
+    e.preventDefault();
   }
 
   if (loading) {
@@ -175,7 +207,12 @@ export default function ThreadPage() {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to {thread.subforum} forum
         </Link>
@@ -184,7 +221,30 @@ export default function ThreadPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 mb-8">
           <div className="p-6">
             <div className="flex items-start justify-between">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{thread.title}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {thread.title}
+              </h1>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => handleReportThread()}
+                  className="px-3 py-1 text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 rounded-md shadow-sm"
+                >
+                  Report
+                </button>
+                <button
+                  onClick={() => handleEditThread()}
+                  className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleDeleteThread}
+                  className="px-3 py-1 text-sm text-white bg-red-600 hover:bg-red-700 rounded-md shadow-sm"
+                >
+                  Delete
+                </button>
+              </div>
+
               <div className="flex flex-col items-center ml-4">
                 <button
                   onClick={() => handleVote(thread.id, "thread", 1)}
@@ -198,11 +258,22 @@ export default function ThreadPage() {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 15l7-7 7 7"
+                    />
                   </svg>
                 </button>
                 <span
-                  className={`font-bold text-lg ${threadVotes > 0 ? "text-green-500" : threadVotes < 0 ? "text-red-500" : "text-gray-500 dark:text-gray-400"}`}
+                  className={`font-bold text-lg ${
+                    threadVotes > 0
+                      ? "text-green-500"
+                      : threadVotes < 0
+                      ? "text-red-500"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
                 >
                   {threadVotes}
                 </span>
@@ -218,7 +289,12 @@ export default function ThreadPage() {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -227,7 +303,9 @@ export default function ThreadPage() {
             <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
               <div className="flex items-center">
                 <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
-                  {thread.username ? thread.username.charAt(0).toUpperCase() : "?"}
+                  {thread.username
+                    ? thread.username.charAt(0).toUpperCase()
+                    : "?"}
                 </div>
                 <span className="ml-2 font-medium">{thread.username}</span>
               </div>
@@ -244,7 +322,12 @@ export default function ThreadPage() {
             </div>
 
             <div className="mt-6 prose prose-indigo dark:prose-invert max-w-none">
-              <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{thread.content}</p>
+              <div
+                className="text-gray-800 dark:text-gray-200 whitespace-pre-line"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(thread.content),
+                }}
+              />
             </div>
           </div>
         </div>
@@ -276,14 +359,17 @@ export default function ThreadPage() {
         {/* Reply form */}
         {showReplyBox && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 mb-8 p-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Post a Reply</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Post a Reply
+            </h3>
+            {/* PENDING WORK: ADD THE QUILL TEXT EDITOR HERE AS WELL */}
             <form onSubmit={handleSubmitReply}>
               <div className="mb-4">
                 <textarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   rows={4}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white resize-none"
+                  className="block p-3 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white resize-none"
                   placeholder="Write your reply here..."
                   required
                 ></textarea>
@@ -352,7 +438,9 @@ export default function ThreadPage() {
               />
             </svg>
             Replies
-            <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">({replies.length})</span>
+            <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+              ({replies.length})
+            </span>
           </h2>
 
           {replies.length === 0 ? (
@@ -371,7 +459,9 @@ export default function ThreadPage() {
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">No replies yet. Be the first to reply!</p>
+              <p className="mt-4 text-gray-600 dark:text-gray-400">
+                No replies yet. Be the first to reply!
+              </p>
               <button
                 onClick={() => setShowReplyBox(true)}
                 className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 dark:bg-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-800"
@@ -393,24 +483,56 @@ export default function ThreadPage() {
                       <div className="flex-1">
                         <div className="flex items-center">
                           <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                            {reply.username ? reply.username.charAt(0).toUpperCase() : "?"}
+                            {reply.username
+                              ? reply.username.charAt(0).toUpperCase()
+                              : "?"}
                           </div>
                           <div className="ml-2">
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">{reply.username}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {reply.username}
+                            </span>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
                               <time dateTime={reply.created_at}>
-                                {new Date(reply.created_at).toLocaleDateString(undefined, {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {new Date(reply.created_at).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
                               </time>
                             </div>
                           </div>
                         </div>
-                        <div className="mt-3 text-gray-800 dark:text-gray-200 whitespace-pre-line">{reply.content}</div>
+                        <div
+                          className="mt-3 text-gray-800 dark:text-gray-200 whitespace-pre-line"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(reply.content),
+                          }}
+                        />
+                        <div className="flex justify-end space-x-1.5">
+                          <button
+                            onClick={() => handleReportReply(reply.id)}
+                            className="px-3 py-1 text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 rounded-md shadow-sm"
+                          >
+                            Report
+                          </button>
+                          <button
+                            onClick={() => handleEditReply(reply.id)}
+                            className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteReply(reply.id)}
+                            className="px-3 py-1 text-sm text-white bg-red-600 hover:bg-red-800 rounded-md shadow-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
 
                       <div className="flex flex-col items-center ml-4">
@@ -426,11 +548,22 @@ export default function ThreadPage() {
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 15l7-7 7 7"
+                            />
                           </svg>
                         </button>
                         <span
-                          className={`font-medium text-sm ${(replyVotes[reply.id] || 0) > 0 ? "text-green-500" : (replyVotes[reply.id] || 0) < 0 ? "text-red-500" : "text-gray-500 dark:text-gray-400"}`}
+                          className={`font-medium text-sm ${
+                            (replyVotes[reply.id] || 0) > 0
+                              ? "text-green-500"
+                              : (replyVotes[reply.id] || 0) < 0
+                              ? "text-red-500"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
                         >
                           {replyVotes[reply.id] || 0}
                         </span>
@@ -446,7 +579,12 @@ export default function ThreadPage() {
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -459,6 +597,6 @@ export default function ThreadPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 

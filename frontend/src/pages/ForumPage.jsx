@@ -44,7 +44,7 @@ const categories = [
   },
   {
     name: "General Discussions",
-    path: "/forum/General",
+    path: "/forum/general",
     icon: <FaComments />,
     description: "Talk about anything and everything",
   },
