@@ -40,7 +40,7 @@ export default function UserProfilePage() {
   }
 
   function getBadge(reputation) {
-    if (reputation > 500) return { icon: "🥇", label: "Top Contributor", color: "from-yellow-500 to-amber-500" }
+    if (reputation > 500) return { icon: "🥇", label: "FOUNDER", color: "from-orange-500 to-orange-500" }
     if (reputation > 100) return { icon: "🏆", label: "Active Member", color: "from-blue-500 to-indigo-500" }
     return { icon: "⭐", label: "New User", color: "from-green-500 to-emerald-500" }
   }
