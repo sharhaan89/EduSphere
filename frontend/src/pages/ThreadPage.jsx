@@ -3,6 +3,7 @@
 import DOMPurify from "dompurify";
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
+import { Trash2, Edit, Flag } from "lucide-react"; 
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -227,21 +228,21 @@ export default function ThreadPage() {
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => handleReportThread()}
-                  className="px-3 py-1 text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 rounded-md shadow-sm"
+                  className="p-2 text-yellow-600 bg-yellow-100 hover:bg-yellow-200 rounded-md shadow-sm flex items-center space-x-1"
                 >
-                  Report
+                  <Flag size={18} />
                 </button>
                 <button
                   onClick={() => handleEditThread()}
-                  className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm"
+                  className="p-2 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md shadow-sm flex items-center space-x-1"
                 >
-                  Edit
+                  <Edit size={18} />
                 </button>
                 <button
                   onClick={handleDeleteThread}
-                  className="px-3 py-1 text-sm text-white bg-red-600 hover:bg-red-700 rounded-md shadow-sm"
+                  className="p-2 text-red-600 bg-red-100 hover:bg-red-200 rounded-md shadow-sm flex items-center space-x-1"
                 >
-                  Delete
+                  <Trash2 size={18} />
                 </button>
               </div>
 
@@ -513,24 +514,24 @@ export default function ThreadPage() {
                             __html: DOMPurify.sanitize(reply.content),
                           }}
                         />
-                        <div className="flex justify-end space-x-1.5">
+                        <div className="flex justify-end space-x-2">
                           <button
-                            onClick={() => handleReportReply(reply.id)}
-                            className="px-3 py-1 text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 rounded-md shadow-sm"
+                            onClick={() => handleReportThread()}
+                            className="p-1 text-yellow-600 bg-yellow-100 hover:bg-yellow-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
-                            Report
+                            <Flag size={18} />
                           </button>
                           <button
-                            onClick={() => handleEditReply(reply.id)}
-                            className="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm"
+                            onClick={() => handleEditThread()}
+                            className="p-1 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
-                            Edit
+                            <Edit size={18} />
                           </button>
                           <button
-                            onClick={() => handleDeleteReply(reply.id)}
-                            className="px-3 py-1 text-sm text-white bg-red-600 hover:bg-red-800 rounded-md shadow-sm"
+                            onClick={handleDeleteThread}
+                            className="p-1 text-red-600 bg-red-100 hover:bg-red-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
-                            Delete
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </div>

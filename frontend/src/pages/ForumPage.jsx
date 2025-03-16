@@ -139,13 +139,6 @@ export default function ForumPage() {
             ))}
           </div>
         </main>
-
-        <footer className="mt-10 text-center text-white/80">
-          <p className="text-sm">
-            &copy; {new Date().getFullYear()} EduSphere Forums. All rights
-            reserved.
-          </p>
-        </footer>
       </div>
     </div>
   );

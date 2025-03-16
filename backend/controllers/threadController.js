@@ -53,7 +53,7 @@ export async function handleGetThread(req, res) {
             LEFT JOIN votes v ON v.reply_id = r.id
             WHERE r.thread_id = $1
             GROUP BY r.id, u.id
-            ORDER BY r.created_at ASC
+            ORDER BY r.created_at DESC
         `;
 
         const threadResult = await pool.query(threadQuery, [threadid]);

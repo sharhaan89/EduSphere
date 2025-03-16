@@ -4,6 +4,22 @@ import pool from "../config/db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+export async function handleGetUser(req, res) {
+    try {
+        const userId = req.params.userid;
+        const result = await pool.query("SELECT * FROM users WHERE id = $1", [userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "No user found." });
+        }
+
+        res.status(200).json({ user: result.rows[0] });
+    } catch (err) {
+        console.error("Database Error:", err);
+        return res.status(500).json({ error: "Server error. Please try again later." });
+    }
+}
+
 export async function handleUserRegister(req, res) {
     try {
         const { email, name, username, roll_number, password } = req.body;
