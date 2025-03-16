@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
 import { FaGithub, FaLinkedin, FaEdit, FaCalendarAlt, FaTrophy, FaEnvelope, FaIdCard, FaHistory } from "react-icons/fa"
 
-const API_URL = "http://localhost:5000" // Change this as needed
+const API_URL = import.meta.env.VITE_API_URL
 
 export default function UserProfilePage() {
   const { userid } = useParams()
@@ -15,7 +15,7 @@ export default function UserProfilePage() {
   useEffect(() => {
     // Simulate getting the current user ID from auth context
     // In a real app, you'd get this from your authentication system
-    setCurrentUserId("user123") // Replace with actual logic
+    setCurrentUserId("2") // Replace with actual logic
 
     async function fetchUser() {
       try {
