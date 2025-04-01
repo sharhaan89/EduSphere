@@ -22,3 +22,20 @@ export function authenticateUser(req, res, next) {
         res.status(401).json({ error: "Invalid or expired token.", redirect: `${FRONTEND_URL}/user/login` });
     }
 }
+
+export function getLoggedInUser(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: "User not authenticated" });
+        }
+
+        res.json({
+            userid: req.user.user_id,
+            name: req.user.name,
+            username: req.user.username,
+            email: req.user.email,
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+}

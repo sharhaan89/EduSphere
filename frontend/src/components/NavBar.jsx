@@ -29,8 +29,8 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "Forums", path: "/forum" },
     { name: "Academics", path: "/forum/academics/all" },
-    { name: "Internships", path: "/forum/internships/all" },
     { name: "Campus Life", path: "/forum/campus/all" },
+    { name: "Leaderboard", path: "/leaderboard" },
   ]
 
   // Toggle dark mode

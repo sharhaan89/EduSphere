@@ -9,6 +9,7 @@ import ForumPage from "./pages/ForumPage.jsx";
 import SubforumPage from "./pages/SubforumPage.jsx";
 import ThreadCreatePage from "./pages/ThreadCreatePage.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
+import LeaderboardPage from "./pages/LeaderboardPage.jsx";
 import TeamPage from "./pages/TeamPage.jsx";
 import NavBar from "./components/NavBar.jsx";
 import Footer from "./components/Footer.jsx";
@@ -25,6 +26,7 @@ export default function App() {
                     <Route path="/user/login" element={<LoginPage />} />
                     <Route path="/user/register" element={<RegisterPage />} />
                     <Route path="/forum/:subforum/all" element={<SubforumPage />} />
+                    <Route path="/leaderboard" element={<LeaderboardPage />} />
                     <Route path="/team" element={<TeamPage />} />
                     <Route path="/forum/thread/:id" element={<ThreadPage />} />
                     <Route path="/forum/thread/:subforum/create" element={<ThreadCreatePage />} />

@@ -136,17 +136,33 @@ export default function ThreadPage() {
       setPosting(false)
     }
   }
-
-  async function handleDeleteReply(e) {
+  
+  async function handleReportReply(e) {
     e.preventDefault();
+    //redirect to a report creation page, so need to pass the reply id to one of the input fields there
   }
 
   async function handleEditReply(e) {
+    //open a modal in the page itself, and if confirmed and the user is the thread owner/administrator, edit the reply
     e.preventDefault();
+  }
+
+  async function handleDeleteReply(e) {
+    e.preventDefault();
+    //open a confirmation modal in the page itself, and if confirmed and the user is the thread owner/administrator, delete the reply
+  }
+
+  async function handleReportThread(e) {
+    //redirect to a report creation page, so need to pass the thread id to one of the input fields there
+  }
+
+  async function handleEditThread(e) {
+    //redirect to a thread edit page, so need to pass the thread id to one of the input fields there
   }
 
   async function handleDeleteThread(e) {
     e.preventDefault();
+    //open a confirmation modal in the page itself, and if confirmed and the user is the thread owner/administrator, delete the thread
   }
 
   if (loading) {
@@ -227,13 +243,13 @@ export default function ThreadPage() {
               </h1>
               <div className="flex justify-end space-x-2">
                 <button
-                  onClick={() => handleReportThread()}
+                  onClick={handleReportThread}
                   className="p-2 text-yellow-600 bg-yellow-100 hover:bg-yellow-200 rounded-md shadow-sm flex items-center space-x-1"
                 >
                   <Flag size={18} />
                 </button>
                 <button
-                  onClick={() => handleEditThread()}
+                  onClick={handleEditThread}
                   className="p-2 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md shadow-sm flex items-center space-x-1"
                 >
                   <Edit size={18} />
@@ -516,19 +532,19 @@ export default function ThreadPage() {
                         />
                         <div className="flex justify-end space-x-2">
                           <button
-                            onClick={() => handleReportThread()}
+                            onClick={() => handleReportReply()}
                             className="p-1 text-yellow-600 bg-yellow-100 hover:bg-yellow-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Flag size={18} />
                           </button>
                           <button
-                            onClick={() => handleEditThread()}
+                            onClick={() => handleEditReply()}
                             className="p-1 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Edit size={18} />
                           </button>
                           <button
-                            onClick={handleDeleteThread}
+                            onClick={handleDeleteReply}
                             className="p-1 text-red-600 bg-red-100 hover:bg-red-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Trash2 size={18} />
