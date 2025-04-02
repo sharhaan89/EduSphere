@@ -6,6 +6,7 @@ import userRouter from "./routes/userRoutes.js";
 import voteRouter from "./routes/voteRoutes.js";
 import replyRouter from "./routes/replyRoutes.js";
 import threadRouter from "./routes/threadRoutes.js";
+import reportRouter from "./routes/reportRoutes.js";
 import leaderboardRouter from "./routes/leaderboardRoutes.js";
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use("/user", userRouter);
 app.use("/forum/thread", threadRouter);
 app.use("/forum/reply", replyRouter);
 app.use("/forum/vote", voteRouter);
+app.use("/report", reportRouter);
 app.use("/leaderboard", leaderboardRouter);
 
 try {

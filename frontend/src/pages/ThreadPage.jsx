@@ -2,10 +2,12 @@
 
 import DOMPurify from "dompurify";
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { Trash2, Edit, Flag } from "lucide-react"; 
 
 const API_URL = import.meta.env.VITE_API_URL
+
+
 
 export default function ThreadPage() {
   const { id } = useParams()
@@ -18,6 +20,14 @@ export default function ThreadPage() {
   const [posting, setPosting] = useState(false)
   const [threadVotes, setThreadVotes] = useState(0)
   const [replyVotes, setReplyVotes] = useState({})
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
+  const [currentReplyId, setCurrentReplyId] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   async function fetchVoteCounts() {
     try {
@@ -105,6 +115,7 @@ export default function ThreadPage() {
       setVoteLoading(false); // Unlock voting after request completes
     }
   }
+
   async function handleSubmitReply(e) {
     e.preventDefault()
     if (!replyContent.trim()) return
@@ -136,20 +147,63 @@ export default function ThreadPage() {
       setPosting(false)
     }
   }
+
+  const handleSaveEdit = async () => {
+    try {
+      const response = await fetch(`${API_URL}/forum/reply/${currentReplyId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: editedContent }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update reply");
+      }
+  
+      const data = await response.json();
+      console.log(data.message);
+  
+      // Close modal and refresh replies
+      setIsEditing(false);
+      window.location.reload(); // Refresh page (or use state update)
+    } catch (error) {
+      console.error("Error updating reply:", error);
+    }
+  };
+
   
   async function handleReportReply(e) {
     e.preventDefault();
     //redirect to a report creation page, so need to pass the reply id to one of the input fields there
   }
 
-  async function handleEditReply(e) {
-    //open a modal in the page itself, and if confirmed and the user is the thread owner/administrator, edit the reply
-    e.preventDefault();
+  async function handleEditReply(replyId, replyContent) {
+    setCurrentReplyId(replyId);
+    setEditedContent(replyContent);
+    setIsEditing(true);
   }
 
-  async function handleDeleteReply(e) {
-    e.preventDefault();
-    //open a confirmation modal in the page itself, and if confirmed and the user is the thread owner/administrator, delete the reply
+  async function handleDeleteReply(replyId) {
+    const isConfirmed = window.confirm("Are you sure you want to delete this reply?");
+    
+    if (!isConfirmed) return;
+  
+    try {
+      const response = await fetch(`${API_URL}/forum/reply/${replyId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete reply.");
+      }
+  
+      window.location.reload();
+    } catch (error) {
+      alert("Error deleting reply.");
+      console.error("Delete Error:", error);
+    }
   }
 
   async function handleReportThread(e) {
@@ -157,12 +211,29 @@ export default function ThreadPage() {
   }
 
   async function handleEditThread(e) {
-    //redirect to a thread edit page, so need to pass the thread id to one of the input fields there
+    navigate(`/forum/thread/edit/${id}`);
   }
 
-  async function handleDeleteThread(e) {
-    e.preventDefault();
-    //open a confirmation modal in the page itself, and if confirmed and the user is the thread owner/administrator, delete the thread
+  async function handleDeleteThread() {
+    const isConfirmed = window.confirm("Are you sure you want to delete this thread?");
+    
+    if (!isConfirmed) return;
+  
+    try {
+      const response = await fetch(`${API_URL}/forum/thread/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete thread.");
+      }
+  
+      window.location.reload();
+    } catch (error) {
+      alert("Error deleting thread.");
+      console.error("Delete Error:", error);
+    }
   }
 
   if (loading) {
@@ -255,7 +326,7 @@ export default function ThreadPage() {
                   <Edit size={18} />
                 </button>
                 <button
-                  onClick={handleDeleteThread}
+                  onClick={() => handleDeleteThread()}
                   className="p-2 text-red-600 bg-red-100 hover:bg-red-200 rounded-md shadow-sm flex items-center space-x-1"
                 >
                   <Trash2 size={18} />
@@ -437,6 +508,38 @@ export default function ThreadPage() {
           </div>
         )}
 
+        {/* Reply Modify Modal */}
+        {isEditing && (
+            <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+                <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+                <h2 className="text-lg font-bold mb-2">Edit Reply</h2>
+                <textarea
+                    className="w-full border p-2 rounded-md"
+                    rows="4"
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                ></textarea>
+                <div className="flex justify-end space-x-2 mt-2">
+                    <button
+                    className="px-3 py-1 bg-gray-300 rounded-md"
+                    onClick={() => setIsEditing(false)}
+                    >
+                    Cancel
+                    </button>
+                    <button
+                    className="px-3 py-1 bg-blue-600 text-white rounded-md"
+                    onClick={handleSaveEdit}
+                    >
+                    Save
+                    </button>
+                </div>
+                </div>
+            </div>
+        )}
+
+              {/* Delete Confirmation Modal for Reply  */}
+
+
         {/* Replies */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
@@ -536,15 +639,15 @@ export default function ThreadPage() {
                             className="p-1 text-yellow-600 bg-yellow-100 hover:bg-yellow-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Flag size={18} />
-                          </button>
+                          </button> 
                           <button
-                            onClick={() => handleEditReply()}
+                            onClick={() => handleEditReply(reply.id, reply.content)}
                             className="p-1 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Edit size={18} />
                           </button>
                           <button
-                            onClick={handleDeleteReply}
+                            onClick={() => handleDeleteReply(reply.id)}
                             className="p-1 text-red-600 bg-red-100 hover:bg-red-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Trash2 size={18} />
