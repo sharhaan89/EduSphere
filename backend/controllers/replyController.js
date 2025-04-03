@@ -20,6 +20,30 @@ export async function handleGetAllReplies(req, res) {
     }
 }
 
+export async function handleGetReply(req, res) {
+    const reply_id = req.params.replyid;
+
+    if (!reply_id) {
+        return res.status(400).json({ error: "Reply ID is required." });
+    }
+
+    try {
+        const result = await pool.query(
+            "SELECT * FROM replies WHERE id = $1",
+            [reply_id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Reply not found." });
+        }
+
+        res.status(200).json({ reply: result.rows[0] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 export async function handleReplyPostToThread(req, res) {
     const { content } = req.body;
     const thread_id = req.params.threadid;

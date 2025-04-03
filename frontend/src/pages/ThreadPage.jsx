@@ -7,8 +7,6 @@ import { Trash2, Edit, Flag } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL
 
-
-
 export default function ThreadPage() {
   const { id } = useParams()
   const [thread, setThread] = useState(null)
@@ -173,9 +171,8 @@ export default function ThreadPage() {
   };
 
   
-  async function handleReportReply(e) {
-    e.preventDefault();
-    //redirect to a report creation page, so need to pass the reply id to one of the input fields there
+  async function handleReportReply(replyUserId, replyId) {
+    navigate(`/report/${replyUserId}?reply_id=${replyId}`);
   }
 
   async function handleEditReply(replyId, replyContent) {
@@ -207,7 +204,7 @@ export default function ThreadPage() {
   }
 
   async function handleReportThread(e) {
-    //redirect to a report creation page, so need to pass the thread id to one of the input fields there
+    navigate(`/report/${thread.user_id}?thread_id=${id}`);
   }
 
   async function handleEditThread(e) {
@@ -635,7 +632,7 @@ export default function ThreadPage() {
                         />
                         <div className="flex justify-end space-x-2">
                           <button
-                            onClick={() => handleReportReply()}
+                            onClick={() => handleReportReply(reply.user_id, reply.id)}
                             className="p-1 text-yellow-600 bg-yellow-100 hover:bg-yellow-200 rounded-md shadow-sm flex items-center space-x-1"
                           >
                             <Flag size={18} />
