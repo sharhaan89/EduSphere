@@ -74,7 +74,6 @@ export async function handleGetThread(req, res) {
     }
 }
 
-
 export async function handleThreadCreate(req, res) {
     try {
         const user_id = req.user.user_id;
@@ -106,13 +105,28 @@ export async function handleThreadModify(req, res) {
         const user_id = req.user.user_id;
         const { title, content } = req.body;
         const thread_id = req.params.id;
-        //console.log(thread_id);
 
-        if (!thread_id || !user_id || (!title && !content)) {
-            return res.status(400).json({ error: "Thread ID, User ID, and at least one field (title/content) are required." });
+        if (!thread_id || (!title && !content)) {
+            return res.status(400).json({ error: "Thread ID and at least one field (title/content) are required." });
         }
 
-        const threadQuery = await pool.query("SELECT * FROM threads WHERE id = $1 AND user_id = $2", [thread_id, user_id]);
+        // Fetch user role
+        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        const userRole = userResult.rows[0].role;
+
+        let threadQuery;
+        if (userRole === "admin" || userRole === "developer") {
+            // Admins and developers can modify any thread
+            threadQuery = await pool.query("SELECT * FROM threads WHERE id = $1", [thread_id]);
+        } else {
+            // Normal users can only modify their own threads
+            threadQuery = await pool.query("SELECT * FROM threads WHERE id = $1 AND user_id = $2", [thread_id, user_id]);
+        }
+
         if (threadQuery.rows.length === 0) {
             return res.status(403).json({ error: "Thread not found or unauthorized." });
         }
@@ -145,11 +159,27 @@ export async function handleThreadDelete(req, res) {
         const user_id = req.user.user_id;
         const thread_id = req.params.id;
 
-        if (!thread_id || !user_id) {
-            return res.status(400).json({ error: "Thread ID and User ID are required." });
+        if (!thread_id) {
+            return res.status(400).json({ error: "Thread ID is required." });
         }
 
-        const threadQuery = await pool.query("SELECT * FROM threads WHERE id = $1 AND user_id = $2", [thread_id, user_id]);
+        // Fetch user role
+        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        const userRole = userResult.rows[0].role;
+
+        let threadQuery;
+        if (userRole === "admin" || userRole === "developer") {
+            // Admins and developers can delete any thread
+            threadQuery = await pool.query("SELECT * FROM threads WHERE id = $1", [thread_id]);
+        } else {
+            // Normal users can only delete their own threads
+            threadQuery = await pool.query("SELECT * FROM threads WHERE id = $1 AND user_id = $2", [thread_id, user_id]);
+        }
+
         if (threadQuery.rows.length === 0) {
             return res.status(403).json({ error: "Thread not found or unauthorized." });
         }
@@ -163,3 +193,4 @@ export async function handleThreadDelete(req, res) {
         res.status(500).json({ error: "Server error." });
     }
 }
+

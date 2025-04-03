@@ -387,12 +387,16 @@ export default function ThreadPage() {
 
             <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
               <div className="flex items-center">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
-                  {thread.username
-                    ? thread.username.charAt(0).toUpperCase()
-                    : "?"}
-                </div>
+                <Link to={`/user/${thread.user_id}`} className="block">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
+                    {thread.username
+                        ? thread.username.charAt(0).toUpperCase()
+                        : "?"}
+                    </div>
+                </Link>
+                <Link to={`/user/${thread.user_id}`} className="block">
                 <span className="ml-2 font-medium">{thread.username}</span>
+                </Link>
               </div>
               <span className="mx-2">•</span>
               <time dateTime={thread.created_at}>
@@ -599,15 +603,19 @@ export default function ThreadPage() {
                     <div className="flex items-start">
                       <div className="flex-1">
                         <div className="flex items-center">
+                        <Link to={`/user/${reply.user_id}`} className="block">
                           <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                             {reply.username
                               ? reply.username.charAt(0).toUpperCase()
                               : "?"}
                           </div>
+                          </Link>
                           <div className="ml-2">
+                          <Link to={`/user/${reply.user_id}`} className="block">
                             <span className="text-sm font-medium text-gray-900 dark:text-white">
                               {reply.username}
                             </span>
+                            </Link>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
                               <time dateTime={reply.created_at}>
                                 {new Date(reply.created_at).toLocaleDateString(

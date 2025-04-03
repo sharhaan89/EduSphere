@@ -99,3 +99,13 @@ export async function handleUserLogin(req, res) {
         res.status(500).json({ error: "Server error. Please try again." });
     }
 }
+
+export async function handleUserLogout(req, res) {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+    });
+    
+    res.status(200).json({ message: "Logged out successfully" });
+}

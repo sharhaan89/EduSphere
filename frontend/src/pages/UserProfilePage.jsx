@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
-import { FaGithub, FaLinkedin, FaEdit, FaCalendarAlt, FaTrophy, FaEnvelope, FaIdCard, FaHistory } from "react-icons/fa"
+import { useNavigate, useParams, Link } from "react-router-dom"
+import { FaGithub, FaLinkedin, FaEdit, FaCalendarAlt, FaTrophy, FaEnvelope, FaIdCard, FaHistory, FaFlag, FaComments, FaListUl } from "react-icons/fa"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -11,6 +11,7 @@ export default function UserProfilePage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState(null) // This would come from your auth context
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Simulate getting the current user ID from auth context
@@ -31,6 +32,22 @@ export default function UserProfilePage() {
     }
     fetchUser()
   }, [userid])
+
+  // Blank functions for the new features
+  const handleReportUser = () => {
+    navigate(`/report/${userid}`)
+    console.log("Report user clicked")
+  }
+
+  const viewAllReplies = () => {
+    // Will contain functionality to view all replies by the user
+    console.log("View all replies clicked")
+  }
+
+  const viewAllThreads = () => {
+    // Will contain functionality to view all threads by the user
+    console.log("View all threads clicked")
+  }
 
   // Utility functions
   function getMemberSince(created_at) {
@@ -129,6 +146,16 @@ export default function UserProfilePage() {
                 <span className="sr-only">Edit Profile</span>
               </button>
             )}
+            {/* Report Button (only visible if not looking at own profile) */}
+            {userid !== currentUserId && (
+              <button 
+                onClick={handleReportUser}
+                className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
+              >
+                <FaFlag className="h-5 w-5" />
+                <span className="sr-only">Report User</span>
+              </button>
+            )}
           </div>
 
           <div className="px-6 py-8 md:px-8 relative">
@@ -162,12 +189,39 @@ export default function UserProfilePage() {
                   <p className="text-indigo-600 dark:text-indigo-400 font-medium">@{user.username}</p>
                 </div>
 
-                {userid === currentUserId && (
+                {userid === currentUserId ? (
                   <button className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 dark:bg-indigo-700 dark:hover:bg-indigo-600">
                     <FaEdit className="mr-2 h-4 w-4" />
                     Edit Profile
                   </button>
+                ) : (
+                  <button 
+                    onClick={handleReportUser}
+                    className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 dark:bg-red-700 dark:hover:bg-red-600"
+                  >
+                    <FaFlag className="mr-2 h-4 w-4" />
+                    Report User
+                  </button>
                 )}
+              </div>
+
+              {/* Activity Buttons Row */}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  onClick={viewAllThreads}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <FaListUl className="mr-2 h-4 w-4 text-indigo-500" />
+                  All Threads
+                </button>
+                
+                <button
+                  onClick={viewAllReplies}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <FaComments className="mr-2 h-4 w-4 text-indigo-500" />
+                  All Replies
+                </button>
               </div>
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -278,20 +332,37 @@ export default function UserProfilePage() {
                         </Link>
                       ))}
 
-                      <Link
-                        to={`/user/${userid}/threads`}
-                        className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 mt-2 transition-colors"
-                      >
-                        View all threads
-                        <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 7l5 5m0 0l-5 5m5-5H6"
-                          />
-                        </svg>
-                      </Link>
+                      <div className="flex space-x-3 mt-4">
+                        <button
+                          onClick={viewAllThreads}
+                          className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                        >
+                          View all threads
+                          <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={viewAllReplies}
+                          className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                        >
+                          View all replies
+                          <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-8">
@@ -321,4 +392,3 @@ export default function UserProfilePage() {
     </div>
   )
 }
-

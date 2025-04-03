@@ -76,10 +76,26 @@ export async function handleReplyModify(req, res) {
     }
 
     try {
-        const result = await pool.query(
-            "UPDATE replies SET content = $1 WHERE id = $2 AND user_id = $3 RETURNING *",
-            [content, reply_id, user_id]
-        );
+        // Fetch user role
+        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        const userRole = userResult.rows[0].role;
+
+        let query, params;
+        if (userRole === "admin" || userRole === "developer") {
+            // Admins and developers can modify any reply
+            query = "UPDATE replies SET content = $1 WHERE id = $2 RETURNING *";
+            params = [content, reply_id];
+        } else {
+            // Normal users can only modify their own replies
+            query = "UPDATE replies SET content = $1 WHERE id = $2 AND user_id = $3 RETURNING *";
+            params = [content, reply_id, user_id];
+        }
+
+        const result = await pool.query(query, params);
 
         if (result.rowCount === 0) {
             return res.status(404).json({ error: "Reply not found or you don't have permission to modify it." });
@@ -101,10 +117,26 @@ export async function handleReplyDelete(req, res) {
     }
 
     try {
-        const result = await pool.query(
-            "DELETE FROM replies WHERE id = $1 AND user_id = $2 RETURNING *",
-            [reply_id, user_id]
-        );
+        // Fetch user role
+        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        const userRole = userResult.rows[0].role;
+
+        let query, params;
+        if (userRole === "admin" || userRole === "developer") {
+            // Admins and developers can delete any reply
+            query = "DELETE FROM replies WHERE id = $1 RETURNING *";
+            params = [reply_id];
+        } else {
+            // Normal users can only delete their own replies
+            query = "DELETE FROM replies WHERE id = $1 AND user_id = $2 RETURNING *";
+            params = [reply_id, user_id];
+        }
+
+        const result = await pool.query(query, params);
 
         if (result.rowCount === 0) {
             return res.status(404).json({ error: "Reply not found or you don't have permission to delete it." });
@@ -116,3 +148,4 @@ export async function handleReplyDelete(req, res) {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
