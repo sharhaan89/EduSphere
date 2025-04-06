@@ -24,6 +24,7 @@ export default function Navbar() {
     { name: "Academics", path: "/forum/academics/all" },
     { name: "Campus Life", path: "/forum/campus/all" },
     { name: "Leaderboard", path: "/leaderboard" },
+    { name: "Search", path: "/forum/search" },
   ]
 
   // Toggle dark mode
@@ -128,44 +129,43 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:ml-8 md:flex md:space-x-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? "text-indigo-600 dark:text-indigo-400"
-                      : "text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
+                {navLinks.map((link) => (
+                    <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+                        location.pathname === link.path
+                        ? "text-indigo-600 dark:text-indigo-400"
+                        : "text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+                    }`}
+                    >
+                    {link.name === "Search" && (
+                        <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-1.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                        </svg>
+                    )}
+                    {link.name}
+                    </Link>
+                ))}
+                </div>
           </div>
+
+
 
           {/* Search, notifications, and profile */}
           <div className="flex items-center">
-            {/* Search */}
-            <div className="hidden md:block">
-              <form onSubmit={handleSearch} className="relative">
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    placeholder="Search forums..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-64 px-4 py-1.5 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-0 top-0 h-full px-3 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    <FaSearch className="h-4 w-4" />
-                  </button>
-                </div>
-              </form>
-            </div>
+
 
             {/* Dark mode toggle */}
             <button

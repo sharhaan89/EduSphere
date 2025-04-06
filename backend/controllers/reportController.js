@@ -28,11 +28,21 @@ export async function handleReportCreate(req, res) {
 export async function handleGetReport(req, res) {
     try {
       const { id } = req.params;
+      const userId = req.user?.user_id;
   
-      if (!id) {
-        return res.status(400).json({ error: "Report ID is required" });
+      if (!id || !userId) {
+        return res.status(400).json({ error: "Report ID and User ID are required" });
       }
   
+      // Fetch user details
+      const userRes = await pool.query("SELECT role FROM users WHERE id = $1", [userId]);
+      if (userRes.rowCount === 0) {
+        return res.status(401).json({ error: "Unauthorized: User not found" });
+      }
+  
+      const userRole = userRes.rows[0].role;
+  
+      // Fetch report with reporter & reportee info
       const query = `
         SELECT 
           reports.*, 
@@ -54,15 +64,43 @@ export async function handleGetReport(req, res) {
         return res.status(404).json({ error: "Report not found" });
       }
   
-      return res.status(200).json(rows[0]);
+      const report = rows[0];
+  
+      // Authorization check
+      const isAuthorized =
+        userRole === "admin" ||
+        userRole === "developer" ||
+        report.reporter_id === userId;
+  
+      if (!isAuthorized) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+  
+      return res.status(200).json(report);
     } catch (error) {
       console.error("Error fetching report:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
-}
-
-export async function handleGetAllReports(req, res) {
+  }  
+  
+  export async function handleGetAllReports(req, res) {
     try {
+      const userId = req.user?.user_id;
+  
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+  
+      const userRes = await pool.query("SELECT role FROM users WHERE id = $1", [userId]);
+      if (userRes.rowCount === 0) {
+        return res.status(401).json({ error: "User not found" });
+      }
+  
+      const userRole = userRes.rows[0].role;
+      if (userRole !== "admin" && userRole !== "developer") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+  
       const query = `
         SELECT 
           reports.*, 
@@ -80,7 +118,7 @@ export async function handleGetAllReports(req, res) {
       const { rows } = await pool.query(query);
   
       if (rows.length === 0) {
-        return res.status(404).json({ error: "Report not found" });
+        return res.status(404).json({ error: "No reports found" });
       }
   
       return res.status(200).json(rows);
@@ -88,4 +126,5 @@ export async function handleGetAllReports(req, res) {
       console.error("Error fetching reports:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
-}
+  }
+  

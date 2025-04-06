@@ -40,12 +40,12 @@ export default function UserProfilePage() {
   }
 
   const viewAllReplies = () => {
-    // Will contain functionality to view all replies by the user
+    navigate(`/forum/search?id=${userid}`);
     console.log("View all replies clicked")
   }
 
   const viewAllThreads = () => {
-    // Will contain functionality to view all threads by the user
+    navigate(`/forum/search?id=${userid}`);
     console.log("View all threads clicked")
   }
 

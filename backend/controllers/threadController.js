@@ -1,5 +1,81 @@
 import pool from "../config/db.js";
 
+export async function handleGetThreadsBySearch(req, res) {
+    try {
+        const { user_id, threadid, title, keywords, subforum, date_from, date_to, sort_by, locked } = req.query;
+
+        // If threadid is provided, fetch only that thread
+        if (threadid) {
+            const thread = await pool.query(`
+                SELECT threads.*, users.username 
+                FROM threads 
+                JOIN users ON threads.user_id = users.id
+                WHERE threads.id = $1
+            `, [threadid]);
+
+            if (thread.rows.length === 0) {
+                return res.status(404).json({ error: "Thread not found" });
+            }
+            return res.status(200).json(thread.rows);
+        }
+
+        let query = `
+            SELECT threads.*, users.username 
+            FROM threads 
+            JOIN users ON threads.user_id = users.id 
+            WHERE 1=1
+        `;  
+        const values = [];
+        let index = 1;
+
+        // Apply filters based on query parameters
+        if (user_id) {
+            query += ` AND threads.user_id = $${index++}`;
+            values.push(user_id);
+        }
+        if (title) {
+            query += ` AND LOWER(threads.title) LIKE LOWER($${index++})`;
+            values.push(`%${title}%`);
+        }
+        if (keywords) {
+            query += ` AND LOWER(threads.content) LIKE LOWER($${index++})`;
+            values.push(`%${keywords}%`);
+        }
+        if (subforum) {
+            query += ` AND threads.subforum = $${index++}`;
+            values.push(subforum);
+        }
+        if (date_from) {
+            query += ` AND threads.created_at >= $${index++}`;
+            values.push(date_from);
+        }
+        if (date_to) {
+            query += ` AND threads.created_at <= $${index++}`;
+            values.push(date_to);
+        }
+        if (locked !== undefined && locked !== "all") {
+            query += ` AND threads.locked = $${index++}`;
+            values.push(locked === "true");  // Convert to boolean
+        }
+
+        // Sorting logic
+        const validSortFields = ["created_at", "title", "user_id"];
+        if (sort_by && validSortFields.includes(sort_by)) {
+            query += ` ORDER BY threads.${sort_by} DESC`;
+        } else {
+            query += " ORDER BY threads.created_at DESC";  // Default sorting by newest first
+        }
+
+        const threads = await pool.query(query, values);
+        res.status(200).json(threads.rows);
+        
+    } catch (error) {
+        console.error("Error fetching threads:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+
 export async function handleGetAllThreads(req, res) {
     const subforum = req.params.subforum;
 
@@ -111,7 +187,7 @@ export async function handleThreadModify(req, res) {
         }
 
         // Fetch user role
-        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        const userResult = await pool.query("SELECT role FROM users WHERE id = $1", [user_id]);
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "User not found." });
         }
@@ -164,7 +240,7 @@ export async function handleThreadDelete(req, res) {
         }
 
         // Fetch user role
-        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        const userResult = await pool.query("SELECT role FROM users WHERE id = $1", [user_id]);
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "User not found." });
         }

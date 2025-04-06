@@ -4,6 +4,53 @@ import pool from "../config/db.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+export async function handleGetUsersBySearch(req, res) {
+    try {
+        const { id, email, name, username, roll_number, sort_by } = req.query;
+
+        let query = "SELECT * FROM users WHERE 1=1";  
+        const values = [];
+        let index = 1;
+
+        // Apply filters based on query parameters
+        if (id) {
+            query += ` AND id = $${index++}`;
+            values.push(id);
+        }
+        if (email) {
+            query += ` AND LOWER(email) LIKE LOWER($${index++})`;
+            values.push(`%${email}%`);
+        }
+        if (name) {
+            query += ` AND LOWER(name) LIKE LOWER($${index++})`;
+            values.push(`%${name}%`);
+        }
+        if (username) {
+            query += ` AND LOWER(username) LIKE LOWER($${index++})`;
+            values.push(`%${username}%`);
+        }
+        if (roll_number) {
+            query += ` AND roll_number = $${index++}`;
+            values.push(roll_number);
+        }
+
+        // Sorting logic
+        const validSortFields = ["id", "email", "name", "username", "roll_number"];
+        if (sort_by && validSortFields.includes(sort_by)) {
+            query += ` ORDER BY ${sort_by} ASC`;
+        } else {
+            query += " ORDER BY id ASC";  // Default sorting by ID
+        }
+
+        const users = await pool.query(query, values);
+        res.status(200).json(users.rows);
+        
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 export async function handleGetUser(req, res) {
     try {
         const userId = req.params.userid;

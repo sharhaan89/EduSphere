@@ -21,7 +21,7 @@ export async function authenticateUser(req, res, next) {
     const userid = decoded.user_id;
 
     const result = await pool.query(
-      "SELECT banned FROM users WHERE userid = $1",
+      "SELECT banned FROM users WHERE id = $1",
       [userid]
     );
 
@@ -39,6 +39,7 @@ export async function authenticateUser(req, res, next) {
 
     next();
   } catch (err) {
+    console.log(err);
     res
       .status(401)
       .json({

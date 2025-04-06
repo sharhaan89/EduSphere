@@ -1,5 +1,64 @@
 import pool from "../config/db.js";
 
+export async function handleGetRepliesBySearch(req, res) {
+    try {
+        const { replyId, threadId, username, keywords, dateFrom, dateTo, sortBy } = req.query;
+
+        let query = `
+            SELECT replies.*, users.username 
+            FROM replies
+            JOIN users ON replies.user_id = users.id
+            WHERE 1=1`;
+        
+        let values = [];
+        let index = 1;
+
+        if (replyId) {
+            query += ` AND replies.id = $${index++}`;
+            values.push(replyId);
+        }
+
+        if (threadId) {
+            query += ` AND replies.thread_id = $${index++}`;
+            values.push(threadId);
+        }
+
+        if (username) {
+            query += ` AND users.username ILIKE $${index++}`;
+            values.push(`%${username}%`);
+        }
+
+        if (keywords) {
+            query += ` AND replies.content ILIKE $${index++}`;
+            values.push(`%${keywords}%`);
+        }
+
+        if (dateFrom) {
+            query += ` AND replies.created_at >= $${index++}`;
+            values.push(dateFrom);
+        }
+
+        if (dateTo) {
+            query += ` AND replies.created_at <= $${index++}`;
+            values.push(dateTo);
+        }
+
+        // Sorting
+        if (sortBy === "oldest") {
+            query += ` ORDER BY replies.created_at ASC`;
+        } else {
+            query += ` ORDER BY replies.created_at DESC`; // Default: Newest
+        }
+
+        const result = await pool.query(query, values);
+        res.json(result.rows);
+        
+    } catch (error) {
+        console.error("Error fetching replies:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 export async function handleGetAllReplies(req, res) {
     const threadid  = req.params.threadid;
 
@@ -77,7 +136,7 @@ export async function handleReplyModify(req, res) {
 
     try {
         // Fetch user role
-        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        const userResult = await pool.query("SELECT role FROM users WHERE id = $1", [user_id]);
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "User not found." });
         }
@@ -118,7 +177,7 @@ export async function handleReplyDelete(req, res) {
 
     try {
         // Fetch user role
-        const userResult = await pool.query("SELECT role FROM users WHERE userid = $1", [user_id]);
+        const userResult = await pool.query("SELECT role FROM users WHERE id = $1", [user_id]);
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: "User not found." });
         }

@@ -11,6 +11,7 @@ import ThreadCreatePage from "./pages/ThreadCreatePage.jsx";
 import ThreadEditPage from "./pages/ThreadEditPage.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
 import LeaderboardPage from "./pages/LeaderboardPage.jsx";
+import SearchEnginePage from "./pages/SearchEnginePage.jsx";
 import ReportCreatePage from "./pages/ReportCreatePage.jsx";
 import TeamPage from "./pages/TeamPage.jsx";
 import NavBar from "./components/NavBar.jsx";
@@ -30,6 +31,7 @@ export default function App() {
                     <Route path="/forum/:subforum/all" element={<SubforumPage />} />
                     <Route path="/leaderboard" element={<LeaderboardPage />} />
                     <Route path="/team" element={<TeamPage />} />
+                    <Route path="/forum/search" element={<SearchEnginePage />} />
                     <Route path="/report/:reportee_id" element={<ReportCreatePage />} />
                     <Route path="/forum/thread/:id" element={<ThreadPage />} />
                     <Route path="/forum/thread/edit/:id" element={<ThreadEditPage />} />
