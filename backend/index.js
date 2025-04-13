@@ -63,104 +63,140 @@ app.get("/api/user/currentuser", async (req, res) => {
 });
 
 // Track users by room
-let onlineUsers = [];
+const rooms = new Map(); // Using Map to store room => users mapping
 
 io.on("connection", async (socket) => {
   const userId = socket.handshake.query.userId;
   const username = socket.handshake.query.username;
-  const room = socket.handshake.query.room || 'general'; // Default to 'general' if no room specified
+  const initialRoom = socket.handshake.query.room || 'general'; // Default to 'general' if no room specified
 
-  console.log(`User connected: ${username} (${userId}) attempting to join room: ${room}`);
+  console.log(`User connected: ${username} (${userId}) with socket ID: ${socket.id}`);
+  console.log(`Initial room request: ${initialRoom}`);
 
-  // Join the specified room
-  socket.join(room);
-  console.log(`User ${username} joined room: ${room}`);
+  // Store user data on socket object for easy access
+  socket.userData = {
+    userId,
+    username,
+    socketId: socket.id
+  };
+  
+  // Set an initial room but don't join yet - wait for explicit joinRoom event
+  socket.currentRoom = null;
 
-  // Handle explicit room joining (in case room changes)
-  socket.on("joinRoom", (newRoom) => {
-    // If the user was in a different room before, leave it first
-    if (socket.currentRoom && socket.currentRoom !== newRoom) {
-      socket.leave(socket.currentRoom);
-      
-      // Remove user from previous room in our tracking array
-      onlineUsers = onlineUsers.filter(
-        user => !(user.socketId === socket.id && user.room === socket.currentRoom)
-      );
-      
-      // Notify clients in the old room
-      io.to(socket.currentRoom).emit(
-        "onlineUsers", 
-        onlineUsers.filter(user => user.room === socket.currentRoom)
-      );
+  // Handle explicit room joining
+  socket.on("joinRoom", (roomName) => {
+    // If already in a room, leave it first
+    if (socket.currentRoom) {
+      leaveRoom(socket, socket.currentRoom);
     }
     
-    // Join new room
-    socket.join(newRoom);
-    socket.currentRoom = newRoom;
-    console.log(`User ${username} joined room: ${newRoom}`);
-    
-    // Add user to the new room in our tracking
-    addUserToRoom(socket.id, userId, username, newRoom);
+    joinRoom(socket, roomName);
   });
 
-  // Store the current room on the socket object for reference
-  socket.currentRoom = room;
-
-  // Add user to room or update if already exists
-  addUserToRoom(socket.id, userId, username, room);
+  // Send the initial joinRoom request based on connection parameters
+  socket.emit("connect_confirm", { socketId: socket.id });
+  
+  // Automatically join the initial room after connection
+  process.nextTick(() => {
+    joinRoom(socket, initialRoom);
+  });
 
   socket.on("sendMessage", (message) => {
-    const messageRoom = message.room || socket.currentRoom;
-    console.log(`Message from ${username} in room ${messageRoom}: ${message.text}`);
-    // Send the message only to users in the same room
-    io.to(messageRoom).emit("message", message);
+    const room = message.room || socket.currentRoom;
+    
+    if (!room) {
+      console.error(`Message error: User ${username} not in any room`);
+      return;
+    }
+    
+    // Make sure userId is stored as a string consistently
+    const messageToSend = {
+      ...message,
+      userId: String(message.userId),
+      room: room
+    };
+    
+    console.log(`Message from ${username} (${messageToSend.userId}) in room ${room}: ${message.text}`);
+    
+    // Send the message to all users in the room (including sender for consistency)
+    io.to(room).emit("message", messageToSend);
   });
 
   socket.on("disconnect", () => {
-    console.log(`User disconnected: ${username} (${userId}) from room: ${socket.currentRoom}`);
-
-    // Remove user from tracking array
-    onlineUsers = onlineUsers.filter(user => user.socketId !== socket.id);
+    console.log(`User disconnected: ${username} (${userId}) from socket ${socket.id}`);
     
-    // Only emit updated users for the specific room
+    // Remove user from their current room if any
     if (socket.currentRoom) {
-      const roomUsers = onlineUsers.filter(user => user.room === socket.currentRoom);
-      io.to(socket.currentRoom).emit("onlineUsers", roomUsers);
+      leaveRoom(socket, socket.currentRoom);
     }
   });
-});
-
-// Helper function to add or update a user in a room
-function addUserToRoom(socketId, userId, username, room) {
-  // Check if user is already in the room
-  const existingIndex = onlineUsers.findIndex(
-    user => user.userId === userId && user.room === room
-  );
   
-  if (existingIndex !== -1) {
-    // Update existing user's socket ID
-    onlineUsers[existingIndex].socketId = socketId;
-    console.log(`Updated socket ID for ${username} in room ${room}`);
-  } else {
-    // Add new user to room
-    onlineUsers.push({
-      socketId,
-      userId,
-      username,
-      room
+  // Helper function to join a room
+  function joinRoom(socket, roomName) {
+    // Join the socket.io room
+    socket.join(roomName);
+    socket.currentRoom = roomName;
+    
+    // Initialize room in our tracking Map if it doesn't exist
+    if (!rooms.has(roomName)) {
+      rooms.set(roomName, new Map());
+    }
+    
+    // Add user to room Map - ensure userId is stored as string
+    const roomUsers = rooms.get(roomName);
+    roomUsers.set(socket.id, {
+      socketId: socket.id,
+      userId: String(socket.userData.userId),
+      username: socket.userData.username
     });
-    console.log(`Added ${username} to room ${room}`);
+    
+    console.log(`User ${socket.userData.username} joined room: ${roomName}`);
+    console.log(`Room ${roomName} now has ${roomUsers.size} users`);
+    
+    // Send updated user list to everyone in the room
+    updateRoomUsers(roomName);
   }
   
-  // Send updated user list to everyone in the room
-  const roomUsers = onlineUsers.filter(user => user.room === room);
-  io.to(room).emit("onlineUsers", roomUsers);
-}
+  // Helper function to leave a room
+  function leaveRoom(socket, roomName) {
+    socket.leave(roomName);
+    
+    // Remove user from room in our tracking Map
+    if (rooms.has(roomName)) {
+      const roomUsers = rooms.get(roomName);
+      roomUsers.delete(socket.id);
+      
+      console.log(`User ${socket.userData.username} left room: ${roomName}`);
+      console.log(`Room ${roomName} now has ${roomUsers.size} users`);
+      
+      // If room is empty, remove it from our tracking
+      if (roomUsers.size === 0) {
+        rooms.delete(roomName);
+        console.log(`Room ${roomName} removed (empty)`);
+      } else {
+        // Send updated user list to everyone still in the room
+        updateRoomUsers(roomName);
+      }
+    }
+    
+    socket.currentRoom = null;
+  }
+  
+  // Helper function to broadcast updated user list to a room
+  function updateRoomUsers(roomName) {
+    if (!rooms.has(roomName)) return;
+    
+    const roomUsers = rooms.get(roomName);
+    const userList = Array.from(roomUsers.values());
+    
+    io.to(roomName).emit("onlineUsers", userList);
+  }
+});
 
 try {
   server.listen(PORT, () => {
     console.log(`✅ Server running on PORT: ${PORT}`);
   });
 } catch (err) {
-  console.log("Error in starting the server.");
+  console.log("Error in starting the server:", err);
 }

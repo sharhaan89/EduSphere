@@ -19,6 +19,7 @@ const RoomPage = () => {
   const socketRef = useRef(null)
   const chatContainerRef = useRef()
   const navigate = useNavigate()
+  const currentUsernameRef = useRef(null); // Use username instead of ID for more reliable comparison
 
   // Connect to socket and fetch current user
   useEffect(() => {
@@ -32,11 +33,18 @@ const RoomPage = () => {
         }
         const userData = await response.json()
         setCurrentUser(userData)
+        currentUsernameRef.current = userData.username; // Store username in ref for reliable comparison
+        console.log("Current user set:", userData);
 
-        // Only initialize socket if we don't already have one
-        if (!socketRef.current) {
-          initializeSocket(userData)
+        // Clean up existing socket connection if any
+        if (socketRef.current) {
+          console.log("Cleaning up existing socket connection")
+          socketRef.current.disconnect()
+          socketRef.current = null
         }
+
+        // Initialize new socket connection
+        initializeSocket(userData)
       } catch (err) {
         console.error(err);
         setError("Failed to load user data. Please try again later.")
@@ -54,15 +62,9 @@ const RoomPage = () => {
         socketRef.current = null
       }
     }
-  }, [currentRoom]) // Add currentRoom as dependency to reconnect if room changes
+  }, [currentRoom]) // Reconnect if room changes
 
   const initializeSocket = (user) => {
-    // Ensure we don't create duplicate connections
-    if (socketRef.current) {
-      console.log("Socket already exists, not creating a new one")
-      return
-    }
-
     console.log(`Initializing new socket connection for room: ${currentRoom}`)
     
     // Connect to the socket server with room information
@@ -70,22 +72,34 @@ const RoomPage = () => {
       query: {
         userId: user.id,
         username: user.username,
-        room: currentRoom // Pass the room parameter to the server
+        room: currentRoom
       },
+      withCredentials: true
     })
 
-    // Join the room
+    // Set up event listeners
     socketRef.current.on("connect", () => {
+      console.log(`Connected to socket server with ID: ${socketRef.current.id}`)
+      
+      // Explicitly join the room after connection
       socketRef.current.emit("joinRoom", currentRoom);
+      
+      // Reset messages when joining a new room
+      setMessages([])
       setLoading(false)
-      console.log(`Connected to socket server in room: ${currentRoom}`)
     })
 
     socketRef.current.on("message", (message) => {
+      console.log("Received message:", message);
+      console.log("Current username:", currentUsernameRef.current);
+      console.log("Message username:", message.username);
+      console.log("Is own message:", message.username === currentUsernameRef.current);
+
       setMessages((prevMessages) => [...prevMessages, message])
     })
 
     socketRef.current.on("onlineUsers", (users) => {
+      console.log("Online users updated:", users)
       setOnlineUsers(users)
     })
 
@@ -93,6 +107,10 @@ const RoomPage = () => {
       console.error("Socket connection error:", err)
       setError("Failed to connect to chat server. Please try again later.")
       setLoading(false)
+    })
+    
+    socketRef.current.on("disconnect", (reason) => {
+      console.log(`Socket disconnected: ${reason}`)
     })
   }
 
@@ -108,14 +126,17 @@ const RoomPage = () => {
 
     if (!messageInput.trim() || !socketRef.current) return
 
-    // Send message to server with room information
-    socketRef.current.emit("sendMessage", {
+    const messageData = {
       userId: currentUser.id,
       username: currentUser.username,
       text: messageInput,
       timestamp: new Date().toISOString(),
-      room: currentRoom // Include the room in the message
-    })
+      room: currentRoom
+    }
+
+    // Send message to server
+    socketRef.current.emit("sendMessage", messageData)
+    console.log("Sending message:", messageData)
 
     setMessageInput("")
   }
@@ -206,7 +227,7 @@ const RoomPage = () => {
         {/* Chat Header */}
         <div className="bg-white p-4 border-b border-gray-200 shadow-sm">
             <h1 className="text-xl font-semibold flex items-center">
-                <FiMessageSquare className="mr-2" /> Chat Room {currentRoom && `- ${currentRoom}`}
+                <FiMessageSquare className="mr-2" /> Chat Room: {currentRoom}
             </h1>
         </div>
 
@@ -219,36 +240,44 @@ const RoomPage = () => {
             </div>
           )}
 
-          {messages.map((message, index) => (
-            <div key={`${message.timestamp}-${index}`} className={`flex ${message.userId === currentUser.id ? "justify-end" : "justify-start"}`}>
-              {message.userId !== currentUser.id && (
-                <div
-                  className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-2 cursor-pointer"
-                  onClick={() => handleUserClick(message.userId)}
-                >
-                  <FiUser className="text-indigo-600 text-sm" />
-                </div>
-              )}
-
-              <div
-                className={`max-w-md ${
-                  message.userId === currentUser.id
-                    ? "bg-indigo-500 text-white rounded-tl-lg rounded-tr-lg rounded-bl-lg"
-                    : "bg-white border border-gray-200 rounded-tr-lg rounded-tl-lg rounded-br-lg"
-                } px-4 py-2 shadow-sm`}
+          {messages.map((message, index) => {
+            // Use username for comparison instead of userId
+            const isOwnMessage = message.username === currentUsernameRef.current;
+            
+            return (
+              <div 
+                key={`${message.timestamp}-${index}`} 
+                className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
               >
-                {message.userId !== currentUser.id && (
-                  <p className="text-xs font-medium text-indigo-600 mb-1">{message.username}</p>
+                {!isOwnMessage && (
+                  <div
+                    className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-2 cursor-pointer"
+                    onClick={() => handleUserClick(message.userId)}
+                  >
+                    <FiUser className="text-indigo-600 text-sm" />
+                  </div>
                 )}
-                <p>{message.text}</p>
-                <p
-                  className={`text-xs ${message.userId === currentUser.id ? "text-indigo-100" : "text-gray-500"} text-right mt-1`}
+
+                <div
+                  className={`max-w-md ${
+                    isOwnMessage
+                      ? "bg-indigo-500 text-white rounded-tl-lg rounded-tr-lg rounded-bl-lg"
+                      : "bg-white border border-gray-200 rounded-tr-lg rounded-tl-lg rounded-br-lg"
+                  } px-4 py-2 shadow-sm`}
                 >
-                  {formatTime(message.timestamp)}
-                </p>
+                  {!isOwnMessage && (
+                    <p className="text-xs font-medium text-indigo-600 mb-1">{message.username}</p>
+                  )}
+                  <p>{message.text}</p>
+                  <p
+                    className={`text-xs ${isOwnMessage ? "text-indigo-100" : "text-gray-500"} text-right mt-1`}
+                  >
+                    {formatTime(message.timestamp)}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Message Input */}
