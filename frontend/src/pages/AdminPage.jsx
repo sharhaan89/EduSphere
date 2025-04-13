@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FiUsers, FiFlag, FiSearch, FiMenu, FiX } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiUsers, FiFlag, FiSearch, FiMenu, FiX, FiAlertTriangle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -7,7 +7,43 @@ const API_URL = import.meta.env.VITE_API_URL
 const AdminPage = () => {
   const [activeModule, setActiveModule] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUserAuthorization = async () => {
+      try {
+        const response = await fetch(`${API_URL}/user/currentuser`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const userData = await response.json();
+        const role = userData.role;
+
+        if (role === "admin" || role === "developer") {
+          setAuthorized(true);
+        } else {
+          setAuthorized(false);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUserAuthorization();
+  }, []);
 
   const handleModuleSelect = (module) => {
     setActiveModule(module);
@@ -31,10 +67,62 @@ const AdminPage = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-md max-w-md">
+          <h2 className="text-lg font-medium mb-2">Error</h2>
+          <p>{error}</p>
+          <p className="mt-2">Please try again later or contact support.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-md max-w-md text-center">
+          <FiAlertTriangle className="h-12 w-12 mx-auto mb-4 text-red-500" />
+          <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+          <p className="mb-4">You are not authorized to access this page.</p>
+          <button 
+            onClick={() => navigate("/")} 
+            className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+          >
+            Go Back to Homepage
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-6">
+          {/* Mobile menu button */}
+          <div className="md:hidden mb-4 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-800">Admin Panel</h2>
+            <button 
+              onClick={toggleMobileMenu} 
+              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            >
+              {isMobileMenuOpen ? 
+                <FiX className="h-6 w-6" /> : 
+                <FiMenu className="h-6 w-6" />
+              }
+            </button>
+          </div>
+
           <div className="flex flex-col md:flex-row gap-6">
             {/* Sidebar */}
             <div className={`${

@@ -138,7 +138,7 @@ export async function handleUserLogin(req, res) {
         }
 
         const token = jwt.sign(
-            { user_id: user.id, name: user.name, username: user.username, email: user.email },
+            { user_id: user.id, name: user.name, username: user.username, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );

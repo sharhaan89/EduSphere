@@ -60,6 +60,7 @@ export function getLoggedInUser(req, res) {
       name: req.user.name,
       username: req.user.username,
       email: req.user.email,
+      role: req.user.role,
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });

@@ -20,6 +20,8 @@ import AdminPage from "./pages/AdminPage.jsx";
 import ManageUsersPage from "./pages/ManageUsersPage.jsx";
 import ReportPage from "./pages/ReportPage.jsx";
 import ReportsListPage from "./pages/ReportsListPage.jsx";
+import RoomPage from "./pages/RoomPage.jsx";
+import RoomsListPage from "./pages/RoomsListPage.jsx";
 
 export default function App() {
     return (
@@ -35,6 +37,9 @@ export default function App() {
                     <Route path="/forum/:subforum/all" element={<SubforumPage />} />
                     <Route path="/leaderboard" element={<LeaderboardPage />} />
                     <Route path="/team" element={<TeamPage />} />
+
+                    <Route path="/chats" element={<RoomsListPage />} />
+                    <Route path="/chat/:currentRoom" element={<RoomPage />} />
                     <Route path="/acp" element={<AdminPage />} />
                     <Route path="/acp/users" element={<ManageUsersPage />} />
                     <Route path="/acp/reports" element={<ReportsListPage />} />

@@ -24,6 +24,7 @@ export default function Navbar() {
     { name: "Academics", path: "/forum/academics/all" },
     { name: "Campus Life", path: "/forum/campus/all" },
     { name: "Leaderboard", path: "/leaderboard" },
+    { name: "Chat Rooms", path: "/chats" },
     { name: "Search", path: "/forum/search" },
   ]
 
@@ -126,54 +127,72 @@ export default function Navbar() {
                 EduSphere
               </span>
             </Link>
+        </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:ml-8 md:flex md:space-x-4">
-                {navLinks.map((link) => (
-                    <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
-                        location.pathname === link.path
-                        ? "text-indigo-600 dark:text-indigo-400"
-                        : "text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-                    }`}
-                    >
-                    {link.name === "Search" && (
-                        <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-1.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                        </svg>
-                    )}
-                    {link.name}
-                    </Link>
-                ))}
-                </div>
-          </div>
+{/* Desktop Navigation */}
+<div className="hidden md:ml-8 md:flex md:space-x-4">
+  {navLinks.map((link) => (
+    <Link
+      key={link.path}
+      to={link.path}
+      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+        location.pathname === link.path
+          ? "text-indigo-600 dark:text-indigo-400"
+          : "text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+      }`}
+    >
+      {link.name === "Search" && (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4 mr-1.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      )}
+      {link.name}
+    </Link>
+  ))}
+
+  {["admin", "developer"].includes(currentUser?.role) && (
+    <Link
+      to="/acp"
+      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+        location.pathname === "/acp"
+          ? "text-indigo-600 dark:text-indigo-400"
+          : "text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+      }`}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 mr-1.5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9.75 3v1.5m4.5-1.5V4.5m-9 4.5H3v11.25A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5V9H18m-3-4.5v4.5M9 4.5v4.5m0 3h6"
+        />
+      </svg>
+      ACP
+    </Link>
+  )}
+</div>
 
 
 
           {/* Search, notifications, and profile */}
           <div className="flex items-center">
-
-
-            {/* Dark mode toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="ml-4 p-2 rounded-full text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              {isDarkMode ? <FaSun className="h-5 w-5" /> : <FaMoon className="h-5 w-5" />}
-            </button>
 
             {/* Notifications */}
             <div className="ml-4 relative">
