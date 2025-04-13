@@ -128,3 +128,43 @@ export async function handleGetReport(req, res) {
     }
   }
   
+  export async function handleUpdateReport(req, res) {
+    try {
+      const reportId = req.params.id;
+      const userId = req.user?.user_id;
+      const { status } = req.body;
+  
+      if (!reportId || !userId || !status) {
+        return res.status(400).json({ error: "Report ID, User ID, and status are required" });
+      }
+  
+      const userRes = await pool.query("SELECT role FROM users WHERE id = $1", [userId]);
+      if (userRes.rowCount === 0) {
+        return res.status(401).json({ error: "Unauthorized: User not found" });
+      }
+  
+      const userRole = userRes.rows[0].role;
+      if (userRole !== "admin" && userRole !== "developer") {
+        return res.status(403).json({ error: "Access denied" });
+      }
+  
+      const updateQuery = `
+        UPDATE reports
+        SET status = $1
+        WHERE id = $2
+        RETURNING *;
+      `;
+  
+      const { rows } = await pool.query(updateQuery, [status, reportId]);
+  
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+  
+      return res.status(200).json({ message: "Report status updated successfully", report: rows[0] });
+    } catch (error) {
+      console.error("Error updating report status:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+  

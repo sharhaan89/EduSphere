@@ -51,6 +51,18 @@ export async function handleGetUsersBySearch(req, res) {
     }
 }
 
+export async function handleGetAllUsers(req, res) {
+    try {
+        const result = await pool.query(
+            "SELECT id, name, username, roll_number, banned FROM users ORDER BY id ASC"
+        );
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error("Error fetching users list:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 export async function handleGetUser(req, res) {
     try {
         const userId = req.params.userid;

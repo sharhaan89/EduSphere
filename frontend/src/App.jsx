@@ -16,6 +16,10 @@ import ReportCreatePage from "./pages/ReportCreatePage.jsx";
 import TeamPage from "./pages/TeamPage.jsx";
 import NavBar from "./components/NavBar.jsx";
 import Footer from "./components/Footer.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
+import ManageUsersPage from "./pages/ManageUsersPage.jsx";
+import ReportPage from "./pages/ReportPage.jsx";
+import ReportsListPage from "./pages/ReportsListPage.jsx";
 
 export default function App() {
     return (
@@ -31,6 +35,10 @@ export default function App() {
                     <Route path="/forum/:subforum/all" element={<SubforumPage />} />
                     <Route path="/leaderboard" element={<LeaderboardPage />} />
                     <Route path="/team" element={<TeamPage />} />
+                    <Route path="/acp" element={<AdminPage />} />
+                    <Route path="/acp/users" element={<ManageUsersPage />} />
+                    <Route path="/acp/reports" element={<ReportsListPage />} />
+                    <Route path="/acp/report/:id" element={<ReportPage />} />
                     <Route path="/forum/search" element={<SearchEnginePage />} />
                     <Route path="/report/:reportee_id" element={<ReportCreatePage />} />
                     <Route path="/forum/thread/:id" element={<ThreadPage />} />
