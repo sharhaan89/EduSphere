@@ -22,6 +22,9 @@ import ReportPage from "./pages/ReportPage.jsx";
 import ReportsListPage from "./pages/ReportsListPage.jsx";
 import RoomPage from "./pages/RoomPage.jsx";
 import RoomsListPage from "./pages/RoomsListPage.jsx";
+import AcademicsPage from "./pages/AcademicsPage.jsx";
+import ClubsPage from "./pages/ClubsPage.jsx";
+import InternshipsPage from "./pages/InternshipsPage.jsx";
 
 export default function App() {
     return (
@@ -30,6 +33,9 @@ export default function App() {
             <NavBar />
             <div style={{ marginTop: "60px" }}> 
                 <Routes>
+                    <Route path="/forum/academics/all" element={<AcademicsPage />} />
+                    <Route path="/forum/clubs/all" element={<ClubsPage />} />
+                    <Route path="/forum/internships/all" element={<InternshipsPage />} />
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/forum" element={<ForumPage />} />
                     <Route path="/user/login" element={<LoginPage />} />

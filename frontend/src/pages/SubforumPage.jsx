@@ -31,7 +31,7 @@ export default function SubforumPage() {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
-                {subforum.charAt(0).toUpperCase() + subforum.slice(1)}
+                {subforum.toUpperCase()}
               </span>{" "}
               Forum
             </h1>
