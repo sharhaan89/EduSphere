@@ -48,8 +48,8 @@ export default function ThreadEditPage() {
           throw new Error("Failed to fetch thread data");
         }
         const data = await response.json();
-        setTitle(data.title);
-        setContent(data.content);
+        setTitle(data.thread.title);
+        setContent(data.thread.content);
       } catch (error) {
         setError("Error loading thread data");
       } finally {
