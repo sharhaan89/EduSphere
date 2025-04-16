@@ -10,7 +10,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -61,7 +60,7 @@ export default function Navbar() {
   useEffect(() => {
     const handleClickOutside = () => {
       setUserMenuOpen(false)
-      setNotificationsOpen(false)
+      //setNotificationsOpen(false)
     }
     document.addEventListener("click", handleClickOutside)
     return () => document.removeEventListener("click", handleClickOutside)
@@ -194,74 +193,13 @@ export default function Navbar() {
           {/* Search, notifications, and profile */}
           <div className="flex items-center">
 
-            {/* Notifications */}
-            <div className="ml-4 relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setNotificationsOpen(!notificationsOpen)
-                  setUserMenuOpen(false)
-                }}
-                className="p-1 rounded-full text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <span className="sr-only">View notifications</span>
-                <div className="relative">
-                  <FaBell className="h-6 w-6" />
-                  {currentUser.unreadNotifications > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 flex items-center justify-center text-xs text-white">
-                      {currentUser.unreadNotifications}
-                    </span>
-                  )}
-                </div>
-              </button>
-
-              {/* Notifications dropdown */}
-              {notificationsOpen && (
-                <div
-                  className="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="py-1">
-                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-white">Notifications</h3>
-                    </div>
-                    <div className="max-h-60 overflow-y-auto">
-                      {/* Example notifications */}
-                      <div className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 border-l-4 border-indigo-500">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">Your post received 5 upvotes</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">2 hours ago</p>
-                      </div>
-                      <div className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          New reply to your thread "Help with assignment"
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Yesterday</p>
-                      </div>
-                      <div className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">Welcome to EduSphere Forums!</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">3 days ago</p>
-                      </div>
-                    </div>
-                    <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
-                      <Link
-                        to="/notifications"
-                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
-                      >
-                        View all notifications
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Profile dropdown */}
             <div className="ml-4 relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   setUserMenuOpen(!userMenuOpen)
-                  setNotificationsOpen(false)
+                  //setNotificationsOpen(false)
                 }}
                 className="flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-full"
               >
