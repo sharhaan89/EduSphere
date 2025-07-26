@@ -42,7 +42,6 @@ EduSphere is fully hosted and live. You can explore the application here:
 ## 📷 Screenshots
 
 ### 🏠 Landing Page
-The home page displays the portal layout with all available subforums for easy navigation and quick access to trending discussions.
 
 <img width="1890" height="862" alt="landing_page" src="https://github.com/user-attachments/assets/297b1baf-1821-4180-84c3-0ba6c25fb214" />
 
