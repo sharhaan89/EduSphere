@@ -196,14 +196,7 @@ const HomePage = () => {
             </h1>
 
             <p className="mt-6 max-w-6xl mx-auto text-xl text-gray-600 dark:text-gray-300 font-serif leading-relaxed">
-              EduSphere is a centralized platform for students to share notes,
-              study materials, and clarify doubts through an interactive
-              discussion forum. It allows users to upload subject-wise
-              categorized resources, track updated versions, and engage in
-              academic discussions. The portal fosters collaborative learning by
-              enabling students to ask and answer questions, share insights, and
-              access high-quality study materials, making it easier to stay
-              organized and excel in academics.
+EduSphere is a student-focused community forum built for meaningful discussions across academics, internships, and campus life. It offers categorized subforums, threads with replies, upvoting/downvoting, content and user reporting, live chat rooms, and a gamified leaderboard system — all designed to encourage active participation and collaborative engagement.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Link
@@ -224,7 +217,7 @@ const HomePage = () => {
         </div>
 
         {/* Wave Divider */}
-        <div className="relative">
+        {/* <div className="relative">
           <svg
             className="w-full h-24 sm:h-32 fill-current text-white dark:text-gray-800"
             viewBox="0 0 1440 72"
@@ -232,11 +225,11 @@ const HomePage = () => {
           >
             <path d="M0,0 C240,40 480,60 720,60 C960,60 1200,40 1440,0 L1440,72 L0,72 Z" />
           </svg>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Section */}
-      <div className="bg-white dark:bg-gray-800 py-12">
+      {/* <div className="bg-white dark:bg-gray-800 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <div
@@ -304,8 +297,8 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </div> 
+      </div> */}
 
       {/* Featured Categories */}
       <div className="py-16 bg-gray-50 dark:bg-gray-900">
@@ -366,7 +359,7 @@ const HomePage = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-16 bg-white dark:bg-gray-800 overflow-hidden">
+      {/* <div className="py-16 bg-white dark:bg-gray-800 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
             <h2 className="text-base text-indigo-600 dark:text-indigo-400 font-semibold tracking-wide uppercase">
@@ -414,222 +407,40 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="py-16 bg-gradient-to-r from-indigo-600 to-purple-600 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-              What Our Community Says
-            </h2>
-            <p className="mt-3 max-w-2xl mx-auto text-lg text-indigo-100">
-              Join thousands of students who have transformed their academic
-              journey
-            </p>
-          </div>
-
-          <div className="mt-12 relative">
-            <div className="relative h-80 overflow-hidden">
-              {testimonials.map((testimonial, index) => (
-                <div
-                  key={testimonial.name}
-                  className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                    index === activeTestimonial
-                      ? "opacity-100 translate-x-0"
-                      : index < activeTestimonial
-                      ? "opacity-0 -translate-x-full"
-                      : "opacity-0 translate-x-full"
-                  }`}
-                >
-                  <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                    <div className="h-20 w-20 rounded-full border-4 border-white overflow-hidden">
-                      <img
-                        src={testimonial.avatar || "/placeholder.svg"}
-                        alt={testimonial.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <blockquote className="mt-6 max-w-2xl mx-auto text-lg text-white">
-                      <p>"{testimonial.quote}"</p>
-                    </blockquote>
-                    <div className="mt-4 font-medium text-white">
-                      {testimonial.name}
-                    </div>
-                    <div className="text-sm text-indigo-200">
-                      {testimonial.role}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Testimonial Navigation */}
-            <div className="mt-8 flex justify-center space-x-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveTestimonial(index)}
-                  className={`h-2 w-2 rounded-full focus:outline-none ${
-                    index === activeTestimonial ? "bg-white" : "bg-indigo-300"
-                  }`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Events and Resources */}
-      <div className="py-16 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-2">
-            {/* Upcoming Events */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Upcoming Events
-              </h2>
-              <div className="mt-6 space-y-4">
-                {events.map((event, index) => (
-                  <div
-                    key={event.title}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-start hover:shadow-lg transition-shadow duration-300"
-                  >
-                    <div className="flex-shrink-0 bg-indigo-100 dark:bg-indigo-900 rounded-md p-3 text-indigo-600 dark:text-indigo-400">
-                      <div className="text-xl font-bold">
-                        {event.date.split(",")[0].split(" ")[1]}
-                      </div>
-                      <div className="text-sm">
-                        {event.date.split(",")[0].split(" ")[0]}
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                        {event.title}
-                      </h3>
-                      <div className="mt-1 flex items-center text-sm text-gray-600 dark:text-gray-300">
-                        <span>{event.date}</span>
-                        <span className="mx-2">•</span>
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6">
-                <Link
-                  to="/events"
-                  className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                >
-                  View all events
-                  <FaChevronRight className="ml-1 h-3 w-3" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Quick Links
-              </h2>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <Link
-                  to="/forum"
-                  className="group bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
-                    <FaComments className="h-5 w-5" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-base font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                      Forum Discussions
-                    </h3>
-                  </div>
-                </Link>
-                <Link
-                  to="/resources"
-                  className="group bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="p-2 rounded-md bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400">
-                    <FaBook className="h-5 w-5" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-base font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                      Study Materials
-                    </h3>
-                  </div>
-                </Link>
-                <Link
-                  to="/leaderboard"
-                  className="group bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="p-2 rounded-md bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400">
-                    <FaStar className="h-5 w-5" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-base font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                      Leaderboard
-                    </h3>
-                  </div>
-                </Link>
-                <Link
-                  to="/about"
-                  className="group bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="p-2 rounded-md bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400">
-                    <FaGraduationCap className="h-5 w-5" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-base font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                      About Us
-                    </h3>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </div> */}
 
       {/* Call to Action */}
-      <div className="relative py-16 bg-white dark:bg-gray-800">
+        <div className="relative py-16 bg-white dark:bg-gray-800 flex items-center justify-center min-h-[400px]">
         {/* 
         <div className="hidden lg:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-          <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10 dark:opacity-20"></div>
+            <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10 dark:opacity-20"></div>
         </div>
         */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
-          <div className="lg:max-w-2xl lg:pr-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-              <span className="block">Ready to elevate your</span>
-              <span className="block text-indigo-600 dark:text-indigo-400">
+                <span className="block">Ready to elevate your</span>
+                <span className="block text-indigo-600 dark:text-indigo-400">
                 academic journey?
-              </span>
+                </span>
             </h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-              Join thousands of students who are already part of our community.
-              Share knowledge, collaborate on projects, and build connections
-              that last beyond graduation.
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Join students who are already part of our community.
+                Share knowledge, collaborate on projects, and build connections
+                that last beyond graduation.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Link
+            <div className="mt-8 flex justify-center">
+                <Link
                 to="/user/register"
                 className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300"
-              >
+                >
                 Sign Up Now
                 <FaRocket className="ml-2 -mr-1 h-4 w-4" />
-              </Link>
-              <Link
-                to="/about"
-                className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-300"
-              >
-                Learn More
-              </Link>
+                </Link>
             </div>
-          </div>
+            </div>
         </div>
-      </div>
+        </div>
 
       {/* Newsletter */}
       {/* 

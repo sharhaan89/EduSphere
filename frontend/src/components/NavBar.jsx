@@ -87,15 +87,7 @@ export default function Navbar() {
     handleGetUser();
   }, []);
 
-  const defaultUser = {
-    name: "SK Sharhaan Naim",
-    userid: 2,
-    username: "sharhaan89",
-    avatar: null,
-    unreadNotifications: 3,
-  }
-
-  const currentUser = user || defaultUser;
+  const currentUser = user;
 
   // Get user initials for avatar fallback
   const getInitials = (name) => {
@@ -160,7 +152,7 @@ export default function Navbar() {
     </Link>
   ))}
 
-  {["admin", "developer"].includes(currentUser?.role) && (
+  {currentUser && ["admin", "developer"].includes(currentUser?.role) && (
     <Link
       to="/acp"
       className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
@@ -193,89 +185,91 @@ export default function Navbar() {
           {/* Search, notifications, and profile */}
           <div className="flex items-center">
 
-            {/* Profile dropdown */}
-            <div className="ml-4 relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setUserMenuOpen(!userMenuOpen)
-                  //setNotificationsOpen(false)
-                }}
-                className="flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-full"
-              >
-                <span className="sr-only">Open user menu</span>
-                {currentUser.avatar ? (
-                  <img className="h-8 w-8 rounded-full" src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-                    {getInitials(currentUser.name)}
+            {/* Profile dropdown - only show if user is logged in */}
+            {currentUser && (
+              <div className="ml-4 relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setUserMenuOpen(!userMenuOpen)
+                    //setNotificationsOpen(false)
+                  }}
+                  className="flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-full"
+                >
+                  <span className="sr-only">Open user menu</span>
+                  {currentUser.avatar ? (
+                    <img className="h-8 w-8 rounded-full" src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.name} />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                      {getInitials(currentUser.name)}
+                    </div>
+                  )}
+                  <span className="hidden md:flex md:items-center ml-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{currentUser.username}</span>
+                    <svg
+                      className="ml-1 h-5 w-5 text-gray-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </button>
+
+                {/* Profile dropdown menu */}
+                {userMenuOpen && (
+                  <div
+                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-1">
+                      <Link
+                        to={`/user/${currentUser.userid}`}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <FaUserCircle className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        Your Profile
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <FaCog className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        Settings
+                      </Link>
+                      <button
+                          className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                          onClick={async () => {
+                              try {
+                              const response = await fetch(`${API_URL}/user/logout`, {
+                                  method: "POST",
+                                  credentials: "include", // Important for sending cookies
+                              });
+
+                              if (!response.ok) throw new Error("Failed to sign out");
+
+                              console.log("Signed out successfully");
+                              navigate("/")
+                              window.location.reload(); // Refresh the page
+                              } catch (error) {
+                              console.error("Error signing out:", error);
+                              }
+                          }}
+                          >
+                          <FaSignOutAlt className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          Sign out
+                        </button>
+                    </div>
                   </div>
                 )}
-                <span className="hidden md:flex md:items-center ml-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{currentUser.username}</span>
-                  <svg
-                    className="ml-1 h-5 w-5 text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </button>
-
-              {/* Profile dropdown menu */}
-              {userMenuOpen && (
-                <div
-                  className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="py-1">
-                    <Link
-                      to={`/user/${currentUser.userid}`}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <FaUserCircle className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                      Your Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <FaCog className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                      Settings
-                    </Link>
-                    <button
-                        className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                        onClick={async () => {
-                            try {
-                            const response = await fetch(`${API_URL}/user/logout`, {
-                                method: "POST",
-                                credentials: "include", // Important for sending cookies
-                            });
-
-                            if (!response.ok) throw new Error("Failed to sign out");
-
-                            console.log("Signed out successfully");
-                            navigate("/")
-                            window.location.reload(); // Refresh the page
-                            } catch (error) {
-                            console.error("Error signing out:", error);
-                            }
-                        }}
-                        >
-                        <FaSignOutAlt className="mr-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                        Sign out
-                      </button>
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <div className="flex md:hidden ml-4">
@@ -333,4 +327,3 @@ export default function Navbar() {
     </nav>
   )
 }
-
